@@ -35,7 +35,7 @@ async function translate(text, from, to, options) {
             "Authorization": `Bearer ${apiKey}`,
         },
         body: {
-            type: "json",
+            type: "Json",
             payload: {
                 model: model,
                 messages: [
