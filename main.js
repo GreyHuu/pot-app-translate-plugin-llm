@@ -3,7 +3,15 @@ async function translate(text, from, to, options) {
     const {tauriFetch: fetch} = utils;
 
     let {url, apiKey, model, temperature, stream, extra_model, system_prompt} = config;
-    if (extra_model !== "") {
+    url = url.trim()
+    apiKey = apiKey.trim()
+    model = model.trim()
+    temperature = temperature.trim()
+    stream = stream.trim()
+    extra_model = extra_model.trim()
+    system_prompt = system_prompt.trim()
+
+    if (extra_model.length === 0) {
         model = extra_model;
     }
     if (!url) {
@@ -26,7 +34,8 @@ async function translate(text, from, to, options) {
     if (!system_prompt) {
         system_prompt = "You are a professional multilingual translation expert with deep knowledge of linguistics, cultural nuances, and technical terminology. Your goal is to provide accurate, natural, and context-aware translations across multiple languages."
     }
-    stream = stream === "true"
+
+    stream = true
 
     const res = await fetch(url, {
         method: "POST",
@@ -87,6 +96,7 @@ async function translate(text, from, to, options) {
                     }
                 }
             }
+            return resultText
         } catch (error) {
             console.error("Stream reading error:", error);
             throw error;
