@@ -1,0 +1,22 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="100" cy="100" r="95" fill="#2B7DED" />
+  <!-- 左侧对话气泡 -->
+  <path d="M45 70 C40 70 35 75 35 80 L35 120 C35 125 40 130 45 130 L65 130 L75 145 L75 130 L85 130 C90 130 95 125 95 120 L95 80 C95 75 90 70 85 70 Z" fill="white" />
+  <!-- 右侧对话气泡 -->
+  <path d="M155 70 C160 70 165 75 165 80 L165 120 C165 125 160 130 155 130 L135 130 L125 145 L125 130 L115 130 C110 130 105 125 105 120 L105 80 C105 75 110 70 115 70 Z" fill="#E6F7FF" />
+  <!-- 连接气泡的AI/LLM表示 -->
+  <circle cx="100" cy="100" r="15" fill="#FFD700" />
+  <path d="M85 100 L115 100" stroke="#333" stroke-width="3" />
+  <path d="M100 85 L100 115" stroke="#333" stroke-width="3" />
+  <path d="M90 90 L110 110" stroke="#333" stroke-width="3" />
+  <path d="M90 110 L110 90" stroke="#333" stroke-width="3" />
+  <!-- 左侧气泡中的文本表示 -->
+  <rect x="45" y="85" width="40" height="5" rx="2" fill="#333" />
+  <rect x="45" y="95" width="30" height="5" rx="2" fill="#333" />
+  <rect x="45" y="105" width="35" height="5" rx="2" fill="#333" />
+  <!-- 右侧气泡中的文本表示 -->
+  <rect x="115" y="85" width="40" height="5" rx="2" fill="#333" />
+  <rect x="115" y="95" width="30" height="5" rx="2" fill="#333" />
+  <rect x="115" y="105" width="35" height="5" rx="2" fill="#333" />
+</svg>
