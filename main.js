@@ -56,7 +56,7 @@ async function translate(text, from, to, options) {
     }
 
     if (!system_prompt) {
-        system_prompt = "You are a professional multilingual translation expert. Translate accurately and naturally, maintaining the original meaning and style.";
+        system_prompt = "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it."
     }
 
     // 构建请求参数
