@@ -34,6 +34,7 @@ async function translate(text, from, to, options) {
     extra_model = (extra_model || '').trim();
     system_prompt = (system_prompt || '').trim();
 
+    stream = true
     // 验证API密钥
     if (!apiKey) {
         throw new Error("API key is required");
