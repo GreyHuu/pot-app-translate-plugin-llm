@@ -3,7 +3,7 @@ async function translate(text, from, to, options) {
     const {http} = utils;
     const {fetch} = http;
 
-    let {requestPath: url, model, temperature, stream, extra_model, system_prompt} = config;
+    let {url, apiKey, model, temperature, stream, extra_model, system_prompt} = config;
     if (extra_model) {
         model = extra_model;
     }
@@ -27,13 +27,13 @@ async function translate(text, from, to, options) {
     if (!system_prompt) {
         system_prompt = "You are a professional multilingual translation expert with deep knowledge of linguistics, cultural nuances, and technical terminology. Your goal is to provide accurate, natural, and context-aware translations across multiple languages."
     }
-    stream = stream === "true";
+    stream = false
 
-    const res = await fetch(url, {
+    const result = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${config.api_key}`,
+            "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
             model: model,
@@ -45,12 +45,11 @@ async function translate(text, from, to, options) {
                 },
             ],
             temperature: temperature,
-            stream: stream,
-            max_tokens: 4000,
+            stream: stream
         }),
     });
 
-
+    const res = await result.json();
     // 根据stream参数处理结果
     if (stream) {
         // 流式输出处理

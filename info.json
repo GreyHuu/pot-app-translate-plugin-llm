@@ -6,10 +6,9 @@
   "homepage": "https://github.com/GreyHuu/pot-app-translate-plugin-llm",
   "needs": [
     {
-      "key": "requestPath",
+      "key": "url",
       "display": "请求地址",
-      "type": "input",
-      "default": "https://api.openai.com"
+      "type": "input"
     },
     {
       "key": "apiKey",
@@ -37,14 +36,12 @@
     {
       "key": "system_prompt",
       "display": "系统提示词",
-      "type": "input",
-      "default": "你是一个翻译助手，请将我给你的内容翻译成中文。"
+      "type": "input"
     },
     {
       "key": "temperature",
       "display": "温度",
-      "type": "input",
-      "default": "0.6"
+      "type": "input"
     },
     {
       "key": "stream",
