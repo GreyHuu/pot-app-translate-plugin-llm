@@ -7,7 +7,10 @@ async function translate(text, from, to, options) {
     }
 
     let {url, apiKey, model, temperature, stream, extra_model, system_prompt} = config;
-
+    let model_ori = model
+    let model_stream = stream
+    let model_temperature = temperature
+    let model_extra_model = extra_model
     // 清理输入参数
     url = (url || '').trim();
     apiKey = (apiKey || '').trim();
@@ -70,7 +73,8 @@ async function translate(text, from, to, options) {
         model: model_name,
         messages: [
             {role: "system", content: system_prompt},
-            {role: "user", content: `Translate the following content into ${to}:\n"""\n${text}  参数:${extra_model}  ${model} ${stream} \n"""`},
+            // {role: "user", content: `Translate the following content into ${to}:\n"""\n${text}\n"""`},
+            {role: "user", content: `重复下面的内容: model: ${model_ori} ;extra_model: ${model_extra_model}; stream: ${model_stream};Temperature:${model_temperature} `},
         ],
         temperature: temp,
         stream: stream
