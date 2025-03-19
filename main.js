@@ -3,7 +3,7 @@ async function translate(text, from, to, options) {
     const {tauriFetch: fetch} = utils;
 
     let {url, apiKey, model, temperature, stream, extra_model, system_prompt} = config;
-    if (extra_model) {
+    if (extra_model !== "") {
         model = extra_model;
     }
     if (!url) {
