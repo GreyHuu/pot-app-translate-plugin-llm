@@ -5,7 +5,6 @@ async function translate(text, from, to, options) {
 
     const {config, setResult, utils} = options;
     const {tauriFetch: fetch} = utils;
-
     let {url, apiKey, model, temperature, stream, extra_model, system_prompt} = config;
     url = (url || '').trim()
     apiKey = (apiKey || '').trim()
@@ -15,10 +14,10 @@ async function translate(text, from, to, options) {
     extra_model = (extra_model || '').trim()
     system_prompt = (system_prompt || '').trim()
 
-    if (extra_model.length === 0) {
+    if (!extra_model) {
         model = extra_model;
     }
-    if (url.length === 0) {
+    if (!url) {
         url = "https://api.openai.com/v1/chat/completions";
     } else if (!url.endsWith("/v1/chat/completions")) {
         // 删除URL末尾可能存在的斜杠，以便统一处理
@@ -32,10 +31,10 @@ async function translate(text, from, to, options) {
             url += "/v1/chat/completions";
         }
     }
-    if (temperature.length === 0 || !isFloatOrIntString(temperature)) {
+    if (!temperature || !isFloatOrIntString(temperature)) {
         temperature = 0.6
     }
-    if (system_prompt.length === 0) {
+    if (!system_prompt) {
         system_prompt = "You are a professional multilingual translation expert with deep knowledge of linguistics, cultural nuances, and technical terminology. Your goal is to provide accurate, natural, and context-aware translations across multiple languages."
     }
 
