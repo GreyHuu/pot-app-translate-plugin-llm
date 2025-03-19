@@ -26,7 +26,7 @@ async function translate(text, from, to, options) {
     if (!system_prompt) {
         system_prompt = "You are a professional multilingual translation expert with deep knowledge of linguistics, cultural nuances, and technical terminology. Your goal is to provide accurate, natural, and context-aware translations across multiple languages."
     }
-    stream = false
+    stream = stream === "true"
 
     const res = await fetch(url, {
         method: "POST",
@@ -35,16 +35,19 @@ async function translate(text, from, to, options) {
             "Authorization": `Bearer ${apiKey}`,
         },
         body: {
-            model: model,
-            messages: [
-                {role: "system", content: system_prompt},
-                {
-                    role: "user",
-                    content: `Translate the following content into ${to}:${text}`,
-                },
-            ],
-            temperature: temperature,
-            stream: stream
+            type: "json",
+            payload: {
+                model: model,
+                messages: [
+                    {role: "system", content: system_prompt},
+                    {
+                        role: "user",
+                        content: `Translate the following content into ${to}:${text}`,
+                    },
+                ],
+                temperature: temperature,
+                stream: stream
+            }
         }
     });
 
