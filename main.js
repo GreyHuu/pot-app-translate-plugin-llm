@@ -1,13 +1,7 @@
 async function translate(text, from, to, options) {
-    // 验证必要参数
-    if (!text) {
-        throw new Error("Translation text cannot be empty");
-    }
-
     const {config, setResult, utils} = options;
     const {tauriFetch: fetch} = utils;
 
-    // 参数处理与默认值设置
     function isFloatOrIntString(str) {
         return /^[+-]?\d*\.?\d+$/.test(str?.trim());
     }
@@ -23,6 +17,7 @@ async function translate(text, from, to, options) {
     extra_model = (extra_model || '').trim();
     system_prompt = (system_prompt || '').trim();
 
+    // 验证API密钥
     if (!apiKey) {
         throw new Error("API key is required");
     }
@@ -33,14 +28,23 @@ async function translate(text, from, to, options) {
     // URL处理
     if (!url) {
         url = "https://api.openai.com/v1/chat/completions";
-    } else if (!url.endsWith("/v1/chat/completions")) {
-        while (url.endsWith("/")) {
-            url = url.slice(0, -1);
+    } else {
+        // 确保URL格式正确
+        if (!/https?:\/\/.+/.test(url)) {
+            url = `https://${url}`;
         }
-        if (url.endsWith("/v1")) {
-            url += "/chat/completions";
-        } else {
-            url += "/v1/chat/completions";
+
+        // 处理API路径
+        if (!url.endsWith("/v1/chat/completions")) {
+            const apiUrl = new URL(url);
+            if (apiUrl.pathname.endsWith('/')) {
+                apiUrl.pathname += 'v1/chat/completions';
+            } else if (apiUrl.pathname.endsWith('/v1')) {
+                apiUrl.pathname += '/chat/completions';
+            } else {
+                apiUrl.pathname += '/v1/chat/completions';
+            }
+            url = apiUrl.href;
         }
     }
 
@@ -53,71 +57,89 @@ async function translate(text, from, to, options) {
     }
 
     if (!system_prompt) {
-        system_prompt = "You are a professional multilingual translation expert with deep knowledge of linguistics, cultural nuances, and technical terminology. Your goal is to provide accurate, natural, and context-aware translations across multiple languages.";
+        system_prompt = "You are a professional multilingual translation expert. Translate accurately and naturally, maintaining the original meaning and style.";
     }
 
+    // 构建请求主体和头部
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+    };
+
+    const body = {
+        model: model_name,
+        messages: [
+            {role: "system", content: system_prompt},
+            {role: "user", content: `Translate the following content into ${to}:\n"""\n${text}\n"""`},
+        ],
+        temperature: temp,
+        stream: true
+    };
+
+    // 使用window.fetch处理流式响应
     try {
-        // 使用Text响应类型处理流式输出
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-            },
-            body: {
-                type: "Json",
-                payload: {
-                    model: model_name,
-                    messages: [
-                        {role: "system", content: system_prompt},
-                        {
-                            role: "user",
-                            content: `Translate the following content into ${to}. Only return the translated content without explanations or additional notes:\n\n${text}`,
-                        },
-                    ],
-                    temperature: temp,
-                    stream: true
-                }
-            },
-            // 关键修改：使用正确的响应类型枚举
-            responseType: "Text"
+        const res = await window.fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body)
         });
 
-        if (!res.ok) {
-            const errorData = await res.data.catch(() => "Unknown error");
-            throw new Error(`API request failed (${res.status}): ${typeof errorData === 'object' ? JSON.stringify(errorData) : errorData}`);
-        }
+        if (res.ok) {
+            let target = '';
+            const reader = res.body.getReader();
+            let temp = ''; // 用于存储不完整的JSON
 
-        // 处理文本响应
-        const responseText = await res.data;
-
-        // 手动解析SSE格式
-        const lines = responseText.split("\n");
-        let resultText = "";
-
-        for (const line of lines) {
-            if (line.trim() && line.startsWith('data:') && line !== 'data: [DONE]') {
-                try {
-                    const jsonStr = line.replace('data:', '').trim();
-                    const json = JSON.parse(jsonStr);
-                    // 提取增量内容
-                    const content = json.choices[0]?.delta?.content || '';
-                    if (content) {
-                        resultText += content;
-                        setResult(resultText);
+            try {
+                while (true) {
+                    const {done, value} = await reader.read();
+                    if (done) {
+                        setResult(target.trim());
+                        return target.trim();
                     }
-                } catch (e) {
-                    // 解析错误，忽略此行
-                    console.warn("Failed to parse SSE line:", e.message);
-                }
-            }
-        }
 
-        return resultText;
+                    const str = new TextDecoder().decode(value);
+                    let datas = str.split('data:');
+
+                    for (let data of datas) {
+                        if (data.trim() !== '' && data.trim() !== '[DONE]') {
+                            try {
+                                if (temp !== '') {
+                                    // 合并前一个不完整的JSON
+                                    data = temp + data.trim();
+                                    let result = JSON.parse(data.trim());
+                                    if (result.choices[0]?.delta?.content) {
+                                        target += result.choices[0].delta.content;
+                                        if (setResult) {
+                                            setResult(target);
+                                        }
+                                    }
+                                    temp = '';
+                                } else {
+                                    let result = JSON.parse(data.trim());
+                                    if (result.choices[0]?.delta?.content) {
+                                        target += result.choices[0].delta.content;
+                                        if (setResult) {
+                                            setResult(target);
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                // 保存不完整的JSON片段
+                                temp = data.trim();
+                            }
+                        }
+                    }
+                }
+            } finally {
+                reader.releaseLock();
+            }
+        } else {
+            // 处理HTTP错误
+            const errorText = await res.text().catch(() => "Unknown error");
+            throw `Http Request Error\nHttp Status: ${res.status}\n${errorText}`;
+        }
     } catch (error) {
-        // 错误处理
-        const errorMessage = error.message || String(error);
-        console.error("Translation error:", errorMessage);
-        throw new Error(`Translation failed: ${errorMessage}`);
+        console.error("Translation error:", error);
+        throw error;
     }
 }
