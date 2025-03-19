@@ -18,7 +18,7 @@
     },
     {
       "key": "model",
-      "display": "模型选择(常见模型,其他模型请在额外模型中输入)",
+      "display": "模型选择",
       "type": "select",
       "options": {
         "gpt-4o": "gpt-4o",
@@ -31,7 +31,7 @@
     },
     {
       "key": "extra_model",
-      "display": "额外模型(不为空则以额为模型为准)",
+      "display": "额外模型(若此不为空,则以次为准)",
       "type": "input"
     },
     {
@@ -43,8 +43,8 @@
     {
       "key": "temperature",
       "display": "温度",
-      "type": "number",
-      "default": 0.6
+      "type": "input",
+      "default": "0.6"
     },
     {
       "key": "stream",
