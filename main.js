@@ -1,6 +1,6 @@
 async function translate(text, from, to, options) {
     const {config, setResult, utils} = options;
-    const {tauriFetch: fetch} = utils;
+    const {tauriFetch} = utils;
 
     function isFloatOrIntString(str) {
         return /^[+-]?\d*\.?\d+$/.test(str?.trim());
@@ -13,7 +13,7 @@ async function translate(text, from, to, options) {
     apiKey = (apiKey || '').trim();
     model = (model || '').trim();
     temperature = (temperature || '').trim();
-    stream = true; // 强制使用流式输出
+    stream = (stream || '').trim() === '是'; // 从config获取stream设置
     extra_model = (extra_model || '').trim();
     system_prompt = (system_prompt || '').trim();
 
@@ -23,7 +23,7 @@ async function translate(text, from, to, options) {
     }
 
     // 模型选择逻辑
-    let model_name = extra_model || model || 'gpt-3.5-turbo';
+    let model_name = extra_model || model || 'gpt-4o';
 
     // URL处理
     if (!url) {
@@ -60,31 +60,37 @@ async function translate(text, from, to, options) {
         system_prompt = "You are a professional multilingual translation expert. Translate accurately and naturally, maintaining the original meaning and style.";
     }
 
-    // 构建请求主体和头部
+    // 构建请求参数
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
     };
 
-    const body = {
+    const bodyData = {
         model: model_name,
         messages: [
             {role: "system", content: system_prompt},
             {role: "user", content: `Translate the following content into ${to}:\n"""\n${text}\n"""`},
         ],
         temperature: temp,
-        stream: true
+        stream: stream
     };
 
-    // 使用window.fetch处理流式响应
     try {
-        const res = await window.fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(body)
-        });
+        // 根据stream参数选择处理方式
+        if (stream) {
+            // 流式处理 - 使用window.fetch
+            const res = await window.fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(bodyData)
+            });
 
-        if (res.ok) {
+            if (!res.ok) {
+                const errorText = await res.text().catch(() => "Unknown error");
+                throw `Http Request Error\nHttp Status: ${res.status}\n${errorText}`;
+            }
+
             let target = '';
             const reader = res.body.getReader();
             let temp = ''; // 用于存储不完整的JSON
@@ -109,18 +115,14 @@ async function translate(text, from, to, options) {
                                     let result = JSON.parse(data.trim());
                                     if (result.choices[0]?.delta?.content) {
                                         target += result.choices[0].delta.content;
-                                        if (setResult) {
-                                            setResult(target);
-                                        }
+                                        setResult(target);
                                     }
                                     temp = '';
                                 } else {
                                     let result = JSON.parse(data.trim());
                                     if (result.choices[0]?.delta?.content) {
                                         target += result.choices[0].delta.content;
-                                        if (setResult) {
-                                            setResult(target);
-                                        }
+                                        setResult(target);
                                     }
                                 }
                             } catch (e) {
@@ -134,9 +136,38 @@ async function translate(text, from, to, options) {
                 reader.releaseLock();
             }
         } else {
-            // 处理HTTP错误
-            const errorText = await res.text().catch(() => "Unknown error");
-            throw `Http Request Error\nHttp Status: ${res.status}\n${errorText}`;
+            // 非流式处理 - 使用tauriFetch
+            const res = await tauriFetch(url, {
+                method: "POST",
+                headers: headers,
+                body: {
+                    type: "Json",
+                    payload: bodyData
+                }
+            });
+
+            if (!res.ok) {
+                const errorData = await res.data.catch(() => "Unknown error");
+                throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(errorData)}`;
+            }
+
+            const data = await res.data;
+
+            if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
+                throw new Error("Invalid response format from API");
+            }
+
+            let target = data.choices[0].message.content.trim();
+
+            // 移除可能的引号
+            if (target.startsWith('"')) {
+                target = target.slice(1);
+            }
+            if (target.endsWith('"')) {
+                target = target.slice(0, -1);
+            }
+
+            return target.trim();
         }
     } catch (error) {
         console.error("Translation error:", error);
