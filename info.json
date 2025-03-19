@@ -1,10 +1,62 @@
 {
-  "id": "plugin.com.pot-app.lingva",
+  "id": "plugin.com.pot-app.llm",
   "plugin_type": "translate",
-  "icon": "lingva.svg",
-  "display": "Lingva",
-  "homepage": "https://github.com/pot-app/pot-app-translate-plugin-template",
-  "needs": [{ "key": "requestPath", "display": "请求地址" }],
+  "icon": "icon.svg",
+  "display": "LLM_Translate",
+  "homepage": "https://github.com/GreyHuu/pot-app-translate-plugin-llm",
+  "needs": [
+    {
+      "key": "requestPath",
+      "display": "请求地址",
+      "type": "input",
+      "default": "https://api.openai.com"
+    },
+    {
+      "key": "apiKey",
+      "display": "API密钥",
+      "type": "input"
+    },
+    {
+      "key": "model",
+      "display": "模型选择(常见模型,其他模型请在额外模型中输入)",
+      "type": "select",
+      "options": {
+        "gpt-4o": "gpt-4o",
+        "claude-3-5-sonnet": "claude-3-5-sonnet-2024102",
+        "claude-3-7-sonnet": "claude-3-7-sonnet-20250219",
+        "deepseek-v3": "deepseek-v3",
+        "gemini-2.0-flash": "gemini-2.0-flash"
+      },
+      "default": "gpt-4o"
+    },
+    {
+      "key": "extra_model",
+      "display": "额外模型(不为空则以额为模型为准)",
+      "type": "input"
+    },
+    {
+      "key": "system_prompt",
+      "display": "系统提示词",
+      "type": "input",
+      "default": "你是一个翻译助手，请将我给你的内容翻译成中文。"
+    },
+    {
+      "key": "temperature",
+      "display": "温度",
+      "type": "number",
+      "default": 0.6
+    },
+    {
+      "key": "stream",
+      "display": "流式输出",
+      "type": "select",
+      "options": {
+        "true": "是",
+        "false": "否"
+      },
+      "default": "true"
+    }
+  ],
   "language": {
     "auto": "auto",
     "zh_cn": "zh",

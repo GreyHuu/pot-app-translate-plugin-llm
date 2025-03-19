@@ -1,28 +1,96 @@
 async function translate(text, from, to, options) {
-    const { config, utils } = options;
-    const { tauriFetch: fetch } = utils;
-    let { requestPath: url } = config;
-    let plain_text = text.replaceAll("/", "@@");
-    let encode_text = encodeURIComponent(plain_text);
-    if (url === undefined || url.length === 0) {
-        url = "lingva.pot-app.com"
+    const {config, detect, setResult, utils} = options;
+    const {http} = utils;
+    const {fetch} = http;
+
+    let {requestPath: url, model, temperature, stream, extra_model} = config;
+    if (extra_model) {
+        model = extra_model;
     }
-    if (!url.startsWith("http")) {
-        url = `https://${url}`;
+    if (!url) {
+        url = "https://api.openai.com/v1/chat/completions";
+    } else if (!url.endsWith("/v1/chat/completions")) {
+        // 删除URL末尾可能存在的斜杠，以便统一处理
+        while (url.endsWith("/")) {
+            url = url.slice(0, -1);
+        }
+        // 检查是否已经包含部分路径
+        if (url.endsWith("/v1")) {
+            url += "/chat/completions";
+        } else {
+            url += "/v1/chat/completions";
+        }
     }
-    const res = await fetch(`${url}/api/v1/${from}/${to}/${encode_text}`, {
-        method: 'GET',
+    const res = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.api_key}`,
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                {role: "system", content: system_prompt},
+                {
+                    role: "user",
+                    content: `Translate the following content into ${to}:${text}`,
+                },
+            ],
+            temperature: temperature,
+            stream: stream,
+            max_tokens: 4000,
+        }),
     });
 
-    if (res.ok) {
-        let result = res.data;
-        const { translation } = result;
-        if (translation) {
-            return translation.replaceAll("@@", "/");;
-        } else {
-            throw JSON.stringify(result.trim());
+
+    // 根据stream参数处理结果
+    if (stream) {
+        // 流式输出处理
+        if (!res.ok) {
+            throw new Error(`API request failed with status ${res.status}`);
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let resultText = "";
+
+        try {
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, {stream: true});
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.trim() && line.startsWith('data:') && line !== 'data: [DONE]') {
+                        try {
+                            const jsonStr = line.replace('data:', '').trim();
+                            const json = JSON.parse(jsonStr);
+                            const content = json.choices[0]?.delta?.content || '';
+                            if (content) {
+                                resultText += content;
+                                // 使用 options 中的 setResult 函数更新结果
+                                setResult(resultText);
+                            }
+                        } catch (e) {
+                            // 解析错误，跳过此行
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Stream reading error:", error);
+            throw error;
         }
     } else {
-        throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(res.data)}`;
+        // 非流式输出处理
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => null);
+            throw new Error(`API request failed: ${JSON.stringify(errorData || res.statusText)}`);
+        }
+        const data = await res.json();
+        // 直接返回字符串结果
+        return data.choices[0].message.content.trim();
     }
 }
