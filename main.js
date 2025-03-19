@@ -51,13 +51,13 @@ async function translate(text, from, to, options) {
         }
     });
 
+    // 流式输出处理
+    if (!res.ok) {
+        throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(res.data)}`;
+    }
+
     // 根据stream参数处理结果
     if (stream) {
-        // 流式输出处理
-        if (!res.ok) {
-            throw new Error(`API request failed with status ${res.status}`);
-        }
-
         const reader = res.body.getReader();
         const decoder = new TextDecoder("utf-8");
         let resultText = "";
@@ -92,13 +92,8 @@ async function translate(text, from, to, options) {
             throw error;
         }
     } else {
-        // 非流式输出处理
-        if (!res.ok) {
-            const errorData = await res.data.catch(() => null);
-            throw new Error(`API request failed: ${JSON.stringify(errorData || res.statusText)}`);
-        }
         const data = await res.data;
         // 直接返回字符串结果
-        return data.choices[0].message.content.trim();
+        return data.choices[0].message.content.trim().replace(/^"|"$/g, '');
     }
 }
