@@ -16,24 +16,6 @@
       "type": "input"
     },
     {
-      "key": "model",
-      "display": "模型选择",
-      "type": "select",
-      "options": {
-        "gpt-4o": "gpt-4o",
-        "claude-3-5-sonnet": "claude-3-5-sonnet-2024102",
-        "claude-3-7-sonnet": "claude-3-7-sonnet-20250219",
-        "deepseek-v3": "deepseek-v3",
-        "gemini-2.0-flash": "gemini-2.0-flash"
-      },
-      "default": "gpt-4o"
-    },
-    {
-      "key": "extra_model",
-      "display": "额外模型(若此不为空,则模型以此为准)",
-      "type": "input"
-    },
-    {
       "key": "system_prompt",
       "display": "系统提示词",
       "type": "input"
@@ -50,8 +32,24 @@
       "options": {
         "true": "是",
         "false": "否"
-      },
-      "default": "true"
+      }
+    },
+    {
+      "key": "model",
+      "display": "模型选择",
+      "type": "select",
+      "options": {
+        "gpt-4o": "gpt-4o",
+        "claude-3-5-sonnet": "claude-3-5-sonnet-2024102",
+        "claude-3-7-sonnet": "claude-3-7-sonnet-20250219",
+        "deepseek-v3": "deepseek-v3",
+        "gemini-2.0-flash": "gemini-2.0-flash"
+      }
+    },
+    {
+      "key": "extra_model",
+      "display": "额外模型(若此不为空,则模型以此为准)",
+      "type": "input"
     }
   ],
   "language": {

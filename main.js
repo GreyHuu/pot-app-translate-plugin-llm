@@ -74,7 +74,7 @@ async function translate(text, from, to, options) {
         messages: [
             {role: "system", content: system_prompt},
             // {role: "user", content: `Translate the following content into ${to}:\n"""\n${text}\n"""`},
-            {role: "user", content: `重复下面的内容: config:${config}; model: ${model_ori} ;extra_model: ${model_extra_model}; stream: ${model_stream};Temperature:${model_temperature} `},
+            {role: "user", content: `重复下面的内容: config:${config.url}; model: ${model_ori} ;extra_model: ${model_extra_model}; stream: ${model_stream};Temperature:${model_temperature} `},
         ],
         temperature: temp,
         stream: stream
