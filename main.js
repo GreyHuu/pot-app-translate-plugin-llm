@@ -28,7 +28,7 @@ async function translate(text, from, to, options) {
     }
     stream = false
 
-    const result = await fetch(url, {
+    const res = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -48,7 +48,6 @@ async function translate(text, from, to, options) {
         }),
     });
 
-    const res = await result.json();
     // 根据stream参数处理结果
     if (stream) {
         // 流式输出处理
