@@ -14,9 +14,7 @@ async function translate(text, from, to, options) {
     extra_model = (extra_model || '').trim()
     system_prompt = (system_prompt || '').trim()
 
-    if (!extra_model) {
-        model = extra_model;
-    }
+    model_name = extra_model ? extra_model : model
     if (!url) {
         url = "https://api.openai.com/v1/chat/completions";
     } else if (!url.endsWith("/v1/chat/completions")) {
@@ -49,7 +47,7 @@ async function translate(text, from, to, options) {
         body: {
             type: "Json",
             payload: {
-                model: model,
+                model: model_name,
                 messages: [
                     {role: "system", content: system_prompt},
                     {
