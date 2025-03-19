@@ -17,12 +17,12 @@
     },
     {
       "key": "system_prompt",
-      "display": "系统提示词",
+      "display": "系统提示词(可为空)",
       "type": "input"
     },
     {
       "key": "temperature",
-      "display": "温度",
+      "display": "温度(可为空,默认0.6)",
       "type": "input"
     },
     {
@@ -36,9 +36,10 @@
     },
     {
       "key": "model",
-      "display": "模型选择",
+      "display": "常见模型",
       "type": "select",
       "options": {
+        "default": "请选择常见模型",
         "gpt-4o": "gpt-4o",
         "claude-3-5-sonnet": "claude-3-5-sonnet-2024102",
         "claude-3-7-sonnet": "claude-3-7-sonnet-20250219",
@@ -48,7 +49,7 @@
     },
     {
       "key": "extra_model",
-      "display": "额外模型(若此不为空,则模型以此为准)",
+      "display": "自定义模型(若有值,会覆盖常见模型)",
       "type": "input"
     }
   ],
