@@ -34,7 +34,7 @@ async function translate(text, from, to, options) {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
+        body: {
             model: model,
             messages: [
                 {role: "system", content: system_prompt},
@@ -45,7 +45,7 @@ async function translate(text, from, to, options) {
             ],
             temperature: temperature,
             stream: stream
-        }),
+        }
     });
 
     // 根据stream参数处理结果
