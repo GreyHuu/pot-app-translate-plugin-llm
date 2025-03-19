@@ -3,13 +3,13 @@ async function translate(text, from, to, options) {
     const {tauriFetch: fetch} = utils;
 
     let {url, apiKey, model, temperature, stream, extra_model, system_prompt} = config;
-    url = url.trim()
-    apiKey = apiKey.trim()
-    model = model.trim()
-    temperature = temperature.trim()
-    stream = stream.trim()
-    extra_model = extra_model.trim()
-    system_prompt = system_prompt.trim()
+    url = (url || '').trim()
+    apiKey = (apiKey || '').trim()
+    model = (model || '').trim()
+    temperature = (temperature || '').trim()
+    stream = (stream || '').trim()
+    extra_model = (extra_model || '').trim()
+    system_prompt = (system_prompt || '').trim()
 
     if (extra_model.length === 0) {
         model = extra_model;
