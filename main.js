@@ -70,7 +70,7 @@ async function translate(text, from, to, options) {
         model: model_name,
         messages: [
             {role: "system", content: system_prompt},
-            {role: "user", content: `Translate the following content into ${to}:\n"""\n${text}\n"""`},
+            {role: "user", content: `Translate the following content into ${to}:\n"""\n${text}  参数:${extra_model}  ${model} ${stream} \n"""`},
         ],
         temperature: temp,
         stream: stream

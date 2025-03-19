@@ -30,7 +30,7 @@
     },
     {
       "key": "extra_model",
-      "display": "额外模型\n(若此不为空,则模型以此为准)",
+      "display": "额外模型(若此不为空,则模型以此为准)",
       "type": "input"
     },
     {
