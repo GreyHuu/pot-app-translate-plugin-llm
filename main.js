@@ -94,10 +94,10 @@ async function translate(text, from, to, options) {
     } else {
         // 非流式输出处理
         if (!res.ok) {
-            const errorData = await res.json().catch(() => null);
+            const errorData = await res.data.catch(() => null);
             throw new Error(`API request failed: ${JSON.stringify(errorData || res.statusText)}`);
         }
-        const data = await res.json();
+        const data = await res.data;
         // 直接返回字符串结果
         return data.choices[0].message.content.trim();
     }
