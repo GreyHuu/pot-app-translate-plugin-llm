@@ -1,9 +1,9 @@
 async function translate(text, from, to, options) {
-    const {config, detect, setResult, utils} = options;
+    const {config, setResult, utils} = options;
     const {http} = utils;
     const {fetch} = http;
 
-    let {requestPath: url, model, temperature, stream, extra_model} = config;
+    let {requestPath: url, model, temperature, stream, extra_model, system_prompt} = config;
     if (extra_model) {
         model = extra_model;
     }
@@ -21,6 +21,14 @@ async function translate(text, from, to, options) {
             url += "/v1/chat/completions";
         }
     }
+    if (!temperature) {
+        temperature = 0.6
+    }
+    if (!system_prompt) {
+        system_prompt = "You are a professional multilingual translation expert with deep knowledge of linguistics, cultural nuances, and technical terminology. Your goal is to provide accurate, natural, and context-aware translations across multiple languages."
+    }
+    stream = stream === "true";
+
     const res = await fetch(url, {
         method: "POST",
         headers: {
